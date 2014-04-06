@@ -68,4 +68,6 @@ if __name__ == "__main__":
     print(colorize_bg("there",(100,100,100)))
     print(set_color((250,0,0),(0,255,0)),end='')
     print("FOOOOOO    ",end='')
+    for i in range(40,ord('z')+30):
+        print(chr(i)*10)
     print(clear_style())

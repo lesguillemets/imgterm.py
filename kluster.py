@@ -59,7 +59,7 @@ class Kluster(object):
             self.means = [randint(dmin,dmax) for cl in range(self.k)]
         elif self.dtype == 'array':
             dmin, dmax = np.amin(self.xs, axis=0), np.amax(self.xs, axis=0)
-            print(dmin,dmax)
+            #print(dmin,dmax)
             self.means = [list(map(lambda p: randint(*p), zip(dmin,dmax)))
                                for cl in range(self.k)]
         self.clusters = [self.find_nearest_cluster(x) for x in self.xs]
@@ -78,8 +78,9 @@ class Kluster(object):
     def analyse(self):
         while True:
             changed_cluster = self.step()
-            print(changed_cluster)
+            #print(changed_cluster)
             if changed_cluster <= self.threshold:
+                self.__findmeans()
                 break
         return self.clusters
     
