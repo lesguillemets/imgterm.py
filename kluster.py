@@ -54,13 +54,21 @@ class Kluster(object):
         self.assign_rand_clusters()
     
     def assign_rand_clusters(self):
-        self.clusters = [randint(0,self.k-1) for i in range(self.n)]
+        if self.dtype == 'number':
+            dmin, dmax = min(self.xs), max(self.xs)
+            self.means = [randint(dmin,dmax) for cl in range(self.k)]
+        elif self.dtype == 'array':
+            dmin, dmax = np.amin(self.xs, axis=0), np.amax(self.xs, axis=0)
+            print(dmin,dmax)
+            self.means = [list(map(lambda p: randint(*p), zip(dmin,dmax)))
+                               for cl in range(self.k)]
+        self.clusters = [self.find_nearest_cluster(x) for x in self.xs]
     
     def __findmeans(self):
         if self.dtype == 'number':
             sums = [0]*self.k
         elif self.dtype == 'array':
-            sums = [np.zeros(self.xs[0].shape)] * self.k
+            sums = [np.zeros(self.xs[0].shape) for i in range( self.k)]
         counts = [0]*self.k
         for (cluster, x) in zip(self.clusters, self.xs):
             sums[cluster] += x
@@ -70,7 +78,8 @@ class Kluster(object):
     def analyse(self):
         while True:
             changed_cluster = self.step()
-            if changed_cluster > self.threshold:
+            print(changed_cluster)
+            if changed_cluster <= self.threshold:
                 break
         return self.clusters
     
@@ -113,12 +122,20 @@ class Kluster(object):
 
 
 def test():
-    a = Kluster(2)
+    a = Kluster(3)
     #a.feeddata([[3,4],[5,2],[43,5],[-2,53],[9,9],[0,0]])
-    a.feeddata(list(range(10)) + list(range(60,80)))
+    #a.feeddata(list(range(10)) + list(range(60,80)) + list(range(100,200)))
+    a.feeddata([[randint(0,5), randint(0,5)] for i in range(10)]+
+                [[randint(70,75), randint(-25,-20)] for i in range(20)] +
+                [[randint(200,500),randint(-3,7)] for i in range(20)])
     print(a.dtype)
     a.analyse()
-    print(list(zip(a.xs, a.clusters)))
+    #print(sorted(list(zip(a.clusters, a.xs)), key=lambda x:x[0]))
+    result = list(zip(a.clusters, a.xs))
+    result.sort(key=lambda x: x[0])
+    print(list((r for r in result if r[0] == 0)))
+    print(list((r for r in result if r[0] == 1)))
+    print(list((r for r in result if r[0] == 2)))
 
 if __name__ == '__main__':
     test()

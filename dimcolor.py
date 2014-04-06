@@ -5,26 +5,15 @@ import sys
 from kluster import Kluster
 from random import randint
 
-class ImgKluster(Kluster):
-    def assign_rand_clusters(self):
-        self.means = [
-            np.array([randint(0,255), randint(0,255), randint(0,255)])
-                for i in range(self.k)]
-        print(self.means)
-        self.clusters = [self.find_nearest_cluster(x) for x in self.xs]
-        
-
 def dimcolor(photoary, n):
     if not isinstance(photoary, np.ndarray):
         raise ValueError("np.array is required.")
     aryshape = photoary.shape
     pixelbytes = aryshape[-1]
     photoary = photoary.reshape(-1,pixelbytes)
-    kluster = ImgKluster(n,10)
+    kluster = Kluster(n,10000)
     kluster.feeddata(photoary)
-    #clusters = kluster.analyse()
-    for i in range(3):
-        print(kluster.step(), len(set(kluster.clusters)))
+    clusters = kluster.analyse()
     clusters = kluster.clusters
     # calculate mean color for each cluster.
     means = [np.zeros(pixelbytes) for k in range(n)]
@@ -42,10 +31,12 @@ def dimcolor(photoary, n):
     return photoary.reshape(aryshape)
 
 def make_dimmed(filename, n=10):
+    import os
     photoary = np.array(img.open(filename))
     photoary = dimcolor(photoary,n)
     dimmed = img.fromarray(photoary)
     dimmed.show()
-    #dimmed.save('foo.jpg')
+    basename, ext = os.path.splitext(filename)
+    dimmed.save('{}_dim{}{}'.format(basename,n,ext))
 
 make_dimmed('./mykitten.jpg')
